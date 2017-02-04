@@ -49,6 +49,18 @@ test.afterEach(t => {
   childProcess.spawn = t.context.spawn;
 });
 
+test.serial('query tagged versions from a specific git repository', (t) => {
+  return taggedVersions.getList({ gitDir: '.git' })
+    .then(() => {
+      t.true(childProcess.spawn.calledOnce);
+      t.deepEqual(childProcess.spawn.lastCall.args, [
+        'git', ['--git-dir', '.git', 'log', '--pretty="%d;%H;%ci"', '--decorate=short', '--no-walk', '--tags'], {
+          capture: ['stdout', 'stderr'],
+        },
+      ]);
+    });
+});
+
 test.serial('return all tagged versions', (t) => {
   return taggedVersions.getList()
     .then((list) => {

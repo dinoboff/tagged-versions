@@ -28,6 +28,21 @@ function runCommand(command, args) {
 }
 
 /**
+ * Run git command.
+ *
+ * @param  {Array<string>} cmd            Git command to run
+ * @param  {object}        options        Options
+ * @param  {string}        options.gitDir Path to the git directory (let git find the repo by default)
+ * @return {Promise<string,Error>}
+ */
+function git(cmd, options) {
+  const gitDir = options && options.gitDir;
+  const args = gitDir == null ? cmd : ['--git-dir', gitDir].concat(cmd);
+
+  return runCommand('git', args);
+}
+
+/**
  * Get all tags with a semantic version name out of a list of Refs
  *
  * @param  {string} refs List of refs
@@ -133,7 +148,7 @@ function getList(options) {
   const log = ['log', '--pretty="%d;%H;%ci"', '--decorate=short'];
   const args = rev ? log.concat('--simplify-by-decoration', rev) : log.concat('--no-walk', '--tags');
 
-  return runCommand('git', args).then((output) => {
+  return git(args, options).then((output) => {
     const lines = output.split('\n');
     const tags = flatten(lines.map(parseLine));
 
