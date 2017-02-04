@@ -40,36 +40,32 @@ const versions = {
   },
 };
 
-test.beforeEach(t => {
+test.beforeEach((t) => {
   t.context.exec = childProcess.exec;
   childProcess.exec = sinon.stub().returns(Promise.resolve({ stdout: gitLog }));
 });
 
-test.afterEach(t => {
+test.afterEach((t) => {
   childProcess.exec = t.context.exec;
 });
 
-test.serial('return all tagged versions', (t) => {
-  return taggedVersions.getList()
+test.serial('return all tagged versions', t => taggedVersions.getList()
     .then((list) => {
       t.deepEqual(list, [versions['1.2.0'], versions['1.1.1'], versions['1.1.0'], versions['1.0.0']]);
       t.true(childProcess.exec.calledOnce);
       t.deepEqual(childProcess.exec.lastCall.args, [
         'git log --no-walk --tags --pretty="%d;%H;%ci" --decorate=short',
       ]);
-    });
-});
+    }));
 
-test.serial('return all tagged versions within a range', (t) => {
-  return taggedVersions.getList('^1.1.0')
+test.serial('return all tagged versions within a range', t => taggedVersions.getList('^1.1.0')
     .then((list) => {
       t.deepEqual(list, [versions['1.2.0'], versions['1.1.1'], versions['1.1.0']]);
       t.true(childProcess.exec.calledOnce);
       t.deepEqual(childProcess.exec.lastCall.args, [
         'git log --no-walk --tags --pretty="%d;%H;%ci" --decorate=short',
       ]);
-    });
-});
+    }));
 
 test.serial('return all tagged versions from the branch', (t) => {
   const stdout = ` (HEAD -> feat-simplify-by-decoration, tag: v1.2.0, origin/master, origin/HEAD, master);f6bf448b02c489c8676f2eeaaac72ef93980baf2;2016-10-08 11:47:01 +0100
@@ -90,16 +86,12 @@ test.serial('return all tagged versions from the branch', (t) => {
     });
 });
 
-test.serial('return last tagged version', (t) => {
-  return taggedVersions.getLastVersion()
+test.serial('return last tagged version', t => taggedVersions.getLastVersion()
     .then((version) => {
       t.deepEqual(version, versions['1.2.0']);
-    });
-});
+    }));
 
-test.serial('return last tagged version within a range', (t) => {
-  return taggedVersions.getLastVersion('~1.1')
+test.serial('return last tagged version within a range', t => taggedVersions.getLastVersion('~1.1')
     .then((version) => {
       t.deepEqual(version, versions['1.1.1']);
-    });
-});
+    }));

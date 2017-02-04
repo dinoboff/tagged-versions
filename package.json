@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "validate": "./node_modules/eslint/bin/eslint.js src",
+    "validate": "./node_modules/eslint/bin/eslint.js src test",
     "test": "./node_modules/.bin/nyc ./node_modules/.bin/ava --verbose",
     "watch": "ava --watch",
     "coverage": "nyc ava"
