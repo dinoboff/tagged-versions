@@ -13,14 +13,18 @@ const tagRegex = /tag:\s*([^,)]+)/g;
 const commitDetailsRegex = /^(.+);(.+);(.+)$/;
 
 /**
- * Run shell command and resolve with stdout content
+ * Spawn a child process and resolve with stdout content
  *
- * @param  {string} command Shell command
+ * @param  {string}        command Command to spawn
+ * @param  {Array<string>} args    Command arguments
  * @return {Promise<string,Error>}
  */
-function runCommand(command) {
-  return childProcess.exec(command)
-    .then(result => result.stdout);
+function runCommand(command, args) {
+  const ps = childProcess.spawn(command, args, {
+    capture: ['stdout', 'stderr'],
+  });
+
+  return ps.then(result => result.stdout);
 }
 
 /**
@@ -126,10 +130,10 @@ function compareCommit(a, b) {
 function getList(options) {
   const range = isString(options) ? options : (options && options.range);
   const rev = options && options.rev;
-  const fmt = '--pretty="%d;%H;%ci" --decorate=short';
-  const cmd = rev ? `git log --simplify-by-decoration ${fmt} ${rev}` : `git log --no-walk --tags ${fmt}`;
+  const log = ['log', '--pretty="%d;%H;%ci"', '--decorate=short'];
+  const args = rev ? log.concat('--simplify-by-decoration', rev) : log.concat('--no-walk', '--tags');
 
-  return runCommand(cmd).then((output) => {
+  return runCommand('git', args).then((output) => {
     const lines = output.split('\n');
     const tags = flatten(lines.map(parseLine));
 
