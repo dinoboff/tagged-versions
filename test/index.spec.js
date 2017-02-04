@@ -41,21 +41,23 @@ const versions = {
 };
 
 test.beforeEach(t => {
-  t.context.exec = childProcess.exec;
-  childProcess.exec = sinon.stub().returns(Promise.resolve({ stdout: gitLog }));
+  t.context.spawn = childProcess.spawn;
+  childProcess.spawn = sinon.stub().returns(Promise.resolve({ stdout: gitLog }));
 });
 
 test.afterEach(t => {
-  childProcess.exec = t.context.exec;
+  childProcess.spawn = t.context.spawn;
 });
 
 test.serial('return all tagged versions', (t) => {
   return taggedVersions.getList()
     .then((list) => {
       t.deepEqual(list, [versions['1.2.0'], versions['1.1.1'], versions['1.1.0'], versions['1.0.0']]);
-      t.true(childProcess.exec.calledOnce);
-      t.deepEqual(childProcess.exec.lastCall.args, [
-        'git log --no-walk --tags --pretty="%d;%H;%ci" --decorate=short',
+      t.true(childProcess.spawn.calledOnce);
+      t.deepEqual(childProcess.spawn.lastCall.args, [
+        'git', ['log', '--pretty="%d;%H;%ci"', '--decorate=short', '--no-walk', '--tags'], {
+          capture: ['stdout', 'stderr'],
+        },
       ]);
     });
 });
@@ -64,11 +66,33 @@ test.serial('return all tagged versions within a range', (t) => {
   return taggedVersions.getList('^1.1.0')
     .then((list) => {
       t.deepEqual(list, [versions['1.2.0'], versions['1.1.1'], versions['1.1.0']]);
-      t.true(childProcess.exec.calledOnce);
-      t.deepEqual(childProcess.exec.lastCall.args, [
-        'git log --no-walk --tags --pretty="%d;%H;%ci" --decorate=short',
+      t.true(childProcess.spawn.calledOnce);
+      t.deepEqual(childProcess.spawn.lastCall.args, [
+        'git', ['log', '--pretty="%d;%H;%ci"', '--decorate=short', '--no-walk', '--tags'], {
+          capture: ['stdout', 'stderr'],
+        },
       ]);
     });
+});
+
+test.serial('Query tags in a revision range', async (t) => {
+  await taggedVersions.getList({ rev: 'v1.0.0..v1.1.0' });
+
+  t.true(childProcess.spawn.calledOnce);
+  t.deepEqual(childProcess.spawn.lastCall.args, [
+    'git', ['log', '--pretty="%d;%H;%ci"', '--decorate=short', '--simplify-by-decoration', 'v1.0.0..v1.1.0'], {
+      capture: ['stdout', 'stderr'],
+    },
+  ]);
+
+  await taggedVersions.getList({ rev: '^v1.0.0 v1.1.0' });
+
+  t.true(childProcess.spawn.calledTwice);
+  t.deepEqual(childProcess.spawn.lastCall.args, [
+    'git', ['log', '--pretty="%d;%H;%ci"', '--decorate=short', '--simplify-by-decoration', '^v1.0.0', 'v1.1.0'], {
+      capture: ['stdout', 'stderr'],
+    },
+  ]);
 });
 
 test.serial('return all tagged versions from the branch', (t) => {
@@ -78,17 +102,20 @@ test.serial('return all tagged versions from the branch', (t) => {
  (tag: v1.0.0);9c5d6e1930831431c005bc74543f61a5cb36d617;2016-09-26 23:56:00 +0100
 ;af5c58c9cde876f66719e2c10a80a51cde52865b;2016-09-26 12:17:44 +0100`;
 
-  childProcess.exec.returns(Promise.resolve({ stdout }));
+  childProcess.spawn.returns(Promise.resolve({ stdout }));
 
   return taggedVersions.getList({ rev: 'HEAD' })
     .then((list) => {
       t.deepEqual(list, [versions['1.2.0'], versions['1.1.1'], versions['1.1.0'], versions['1.0.0']]);
-      t.true(childProcess.exec.calledOnce);
-      t.deepEqual(childProcess.exec.lastCall.args, [
-        'git log --simplify-by-decoration --pretty="%d;%H;%ci" --decorate=short HEAD',
+      t.true(childProcess.spawn.calledOnce);
+      t.deepEqual(childProcess.spawn.lastCall.args, [
+        'git', ['log', '--pretty="%d;%H;%ci"', '--decorate=short', '--simplify-by-decoration', 'HEAD'], {
+          capture: ['stdout', 'stderr'],
+        },
       ]);
     });
 });
+
 
 test.serial('return last tagged version', (t) => {
   return taggedVersions.getLastVersion()
