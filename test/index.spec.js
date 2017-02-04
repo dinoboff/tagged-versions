@@ -40,14 +40,11 @@ const versions = {
   },
 };
 
-test.beforeEach((t) => {
-  t.context.exec = childProcess.exec;
-  childProcess.exec = sinon.stub().returns(Promise.resolve({ stdout: gitLog }));
+test.beforeEach(() => {
+  sinon.stub(childProcess, 'exec').returns(Promise.resolve({ stdout: gitLog }));
 });
 
-test.afterEach((t) => {
-  childProcess.exec = t.context.exec;
-});
+test.afterEach.always(() => childProcess.exec.restore());
 
 test.serial('return all tagged versions', t => taggedVersions.getList()
     .then((list) => {
