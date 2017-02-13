@@ -40,17 +40,14 @@ const versions = {
   },
 };
 
-test.beforeEach(t => {
-  t.context.spawn = childProcess.spawn;
-  childProcess.spawn = sinon.stub().returns(Promise.resolve({ stdout: gitLog }));
+test.beforeEach(() => {
+  sinon.stub(childProcess, 'spawn').returns(Promise.resolve({ stdout: gitLog }));
 });
 
-test.afterEach(t => {
-  childProcess.spawn = t.context.spawn;
-});
+test.afterEach.always(() => childProcess.spawn.restore());
 
-test.serial('query tagged versions from a specific git repository', (t) => {
-  return taggedVersions.getList({ gitDir: '.git' })
+test.serial('query tagged versions from a specific git repository', t => taggedVersions
+    .getList({ gitDir: '.git' })
     .then(() => {
       t.true(childProcess.spawn.calledOnce);
       t.deepEqual(childProcess.spawn.lastCall.args, [
@@ -58,11 +55,9 @@ test.serial('query tagged versions from a specific git repository', (t) => {
           capture: ['stdout', 'stderr'],
         },
       ]);
-    });
-});
+    }));
 
-test.serial('return all tagged versions', (t) => {
-  return taggedVersions.getList()
+test.serial('return all tagged versions', t => taggedVersions.getList()
     .then((list) => {
       t.deepEqual(list, [versions['1.2.0'], versions['1.1.1'], versions['1.1.0'], versions['1.0.0']]);
       t.true(childProcess.spawn.calledOnce);
@@ -71,11 +66,9 @@ test.serial('return all tagged versions', (t) => {
           capture: ['stdout', 'stderr'],
         },
       ]);
-    });
-});
+    }));
 
-test.serial('return all tagged versions within a range', (t) => {
-  return taggedVersions.getList('^1.1.0')
+test.serial('return all tagged versions within a range', t => taggedVersions.getList('^1.1.0')
     .then((list) => {
       t.deepEqual(list, [versions['1.2.0'], versions['1.1.1'], versions['1.1.0']]);
       t.true(childProcess.spawn.calledOnce);
@@ -84,8 +77,7 @@ test.serial('return all tagged versions within a range', (t) => {
           capture: ['stdout', 'stderr'],
         },
       ]);
-    });
-});
+    }));
 
 test.serial('Query tags in a revision range', async (t) => {
   await taggedVersions.getList({ rev: 'v1.0.0..v1.1.0' });
@@ -128,17 +120,12 @@ test.serial('return all tagged versions from the branch', (t) => {
     });
 });
 
-
-test.serial('return last tagged version', (t) => {
-  return taggedVersions.getLastVersion()
+test.serial('return last tagged version', t => taggedVersions.getLastVersion()
     .then((version) => {
       t.deepEqual(version, versions['1.2.0']);
-    });
-});
+    }));
 
-test.serial('return last tagged version within a range', (t) => {
-  return taggedVersions.getLastVersion('~1.1')
+test.serial('return last tagged version within a range', t => taggedVersions.getLastVersion('~1.1')
     .then((version) => {
       t.deepEqual(version, versions['1.1.1']);
-    });
-});
+    }));
