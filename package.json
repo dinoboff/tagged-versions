@@ -42,7 +42,9 @@
     "eslint-plugin-import": "^2.2.0",
     "nyc": "^10.1.2",
     "rb-conventional-changelog": "^1.1.9",
-    "sinon": "^1.17.6"
+    "shelljs": "^0.7.6",
+    "sinon": "^1.17.6",
+    "tempfile": "^1.1.1"
   },
   "dependencies": {
     "child-process-promise": "^2.1.3",
