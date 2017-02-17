@@ -80,30 +80,30 @@ test.serial('return all tagged versions within a range', async (t) => {
   t.deepEqual(tags, expected.slice(0, 2));
 });
 
-test('Query tags in a dotted revision range', async (t) => {
-  const tags = await taggedVersions.getList({ gitDir: repo.gitDir, rev: 'v1.0.0..v1.1.0' });
+test('Query tags in between two revision', async (t) => {
+  const tags = await taggedVersions.getList({ gitDir: repo.gitDir, rev: 'v1.1.0..HEAD' });
   const expected = await getTags();
 
-  t.deepEqual(tags, expected.slice(1, -1));
-});
-
-test('Query tags in a revision range', async (t) => {
-  const tags = await taggedVersions.getList({ gitDir: repo.gitDir, rev: '^v1.0.0 v1.1.0' });
-  const expected = await getTags();
-
-  t.deepEqual(tags, expected.slice(1, -1));
+  t.deepEqual(tags, expected.slice(0, 1));
 });
 
 test('return last tagged version', async (t) => {
-  const tags = await taggedVersions.getLastVersion({ gitDir: repo.gitDir });
+  const tag = await taggedVersions.getLastVersion({ gitDir: repo.gitDir });
   const expected = await getTags();
 
-  t.deepEqual(tags, expected[0]);
+  t.deepEqual(tag, expected[0]);
 });
 
-test('return last tagged version within a range', async (t) => {
-  const tags = await taggedVersions.getLastVersion({ gitDir: repo.gitDir, range: '~1.0' });
-  const expected = await getTags();
+test.serial('return last tagged version within a range', async (t) => {
+  process.chdir(repo.root);
 
-  t.deepEqual(tags, expected.pop());
+  const tag = await taggedVersions.getLastVersion('~1.0');
+
+  t.deepEqual(tag.version, '1.0.0');
+});
+
+test('Query last tagged version within a revision range', async (t) => {
+  const tag = await taggedVersions.getLastVersion({ gitDir: repo.gitDir, rev: 'v1.1.0^@' });
+
+  t.deepEqual(tag.version, '1.1.0-0');
 });

@@ -34,14 +34,39 @@ export default function tempRepo() {
       await this.run('config', 'user.email', email);
     },
 
+    async add(files) {
+      const filenames = Object.keys(files).map((name) => {
+        const filename = path.join(repo, name);
+        const dirname = path.dirname(filename);
+        const content = new shell.ShellString(files[name]);
+
+        shell.mkdir('-p', dirname);
+        content.to(filename);
+
+        return name;
+      });
+
+      if (filenames.length > 0) {
+        await this.run('add', ...filenames);
+      }
+
+      return filenames;
+    },
+
     async commit(subject, lines = [], author = 'Bob Smith <bob@example.com>') {
       const msg = [subject].concat('', lines).join('\n').trim();
+      // difference committer date (now) with author date (fixed date)
+      const date = new Date('2017-01-01');
 
-      await this.run('commit', '--allow-empty', `--author=${author}`, `--message=${msg}`);
+      await this.run('commit', '--allow-empty', `--author=${author}`, '--date', date, `--message=${msg}`);
+    },
+
+    async hash(rev) {
+      return this.run('rev-parse', rev);
     },
 
     async info({ grep }) {
-      const line = await this.run('log', '--grep', grep, '--format=%H%x00%ci%x00%s', '-1');
+      const line = await this.run('log', '--grep', grep, '--format=%H%x00%ci%x00%s', '-1', '--all');
       const [hash, isoDate] = line.split('\0');
 
       if (!hash) {
