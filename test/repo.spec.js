@@ -1,4 +1,5 @@
 import test from 'ava';
+import git from 'nodegit';
 import shell from 'shelljs';
 
 import getRepo from '../src/repo';
@@ -29,6 +30,13 @@ test('should open the repository', async (t) => {
   const commit = await repo.getHeadCommit();
 
   t.deepEqual(commit.message().trim(), 'chore: chore1');
+});
+
+test.serial('should use the provided nodegit.Repository', async (t) => {
+  const expected = await git.Repository.open(tmp.gitDir);
+  const actual = await getRepo({ repo: expected });
+
+  t.is(actual, expected);
 });
 
 test.serial('should find the repository', async (t) => {
