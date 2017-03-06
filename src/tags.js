@@ -93,9 +93,9 @@ function processResult(repo, tags) {
 /**
  * Retrieve the list of tag with semver name.
  *
- * @param  {nodegit.Repository} repo          Repository to list the tag of
- * @param  {string}             options.range Semantic range to filter tag with
- * @param  {string}             options.rev   Rev range the tags should be part of
+ * @param  {nodegit.Repository} repo            Repository to list the tag of
+ * @param  {string}             [options.range] Semantic range to filter tag with
+ * @param  {string}             [options.rev]   Rev range the tags should be part of
  * @return {Promise<{hash: string, tag: string, version: string, date: Date},Error>
  */
 module.exports = function getTags(repo, { range, rev } = {}) {

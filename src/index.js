@@ -16,10 +16,12 @@ function isString(v) {
 /**
  * Get list of tag with a  semantic version name.
  *
- * @param  {object|string}   optionsOrRange     Options map or range string
- * @param  {string}          options.range      Semantic range to filter tags with
- * @param  {string|string[]} options.rev        Revision range to filter tags with
- * @return {Promise<Array<Commit>,Error>}
+ * @param  {object|string}      [optionsOrRange] Options map or range string
+ * @param  {nodegit.Repository} [options.repo]   nodegit repository
+ * @param  {string}             [options.gitDir] Path to the repository
+ * @param  {string}             [options.range]  Semantic range to filter tags with
+ * @param  {string|string[]}    [options.rev]    Revision range to filter tags with
+ * @return {Promise<Commit[],Error>}
  */
 function getList(optionsOrRange) {
   const options = isString(optionsOrRange) ? { range: optionsOrRange } : optionsOrRange;
@@ -31,9 +33,11 @@ function getList(optionsOrRange) {
 /**
  * Get most recent tag.
  *
- * @param  {object|string}   optionsOrRange     Options map or range string
- * @param  {string}          options.range      Semantic range to filter tag with
- * @param  {string|string[]} options.rev        Revision range to filter tag with
+ * @param  {object|string}      [optionsOrRange] Options map or range string
+ * @param  {nodegit.Repository} [options.repo]   nodegit repository
+ * @param  {string}             [options.gitDir] Path to the repository
+ * @param  {string}             [options.range]  Semantic range to filter tag with
+ * @param  {string|string[]}    [options.rev]    Revision range to filter tag with
  * @return {Promise<Commit,Error>}
  */
 function getLastVersion(optionsOrRange) {

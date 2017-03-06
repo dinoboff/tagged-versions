@@ -16,7 +16,7 @@ function find(gitDir) {
  * Target the repository at the provided path or try to find the the repository
  * in the current working directory or its parents.
  *
- * @param  {object}             [options.gitDir] Path to the repository
+ * @param  {string}             [options.gitDir] Path to the repository
  * @param  {nodegit.Repository} [options.repo]   nodegit repository
  * @return {Promise<nodegit.Repository, Error>}
  */
