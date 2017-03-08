@@ -51,7 +51,9 @@
     "bluebird": "^3.4.7",
     "git-range": "^0.1.4",
     "lodash.omit": "^4.5.0",
-    "nodegit": "^0.17.0",
     "semver": "^5.3.0"
+  },
+  "peerDependencies": {
+    "nodegit": "^0.17.0"
   }
 }
