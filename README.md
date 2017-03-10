@@ -8,7 +8,7 @@
 
 ## Installation
 ```sh
-npm install nodegit@0.17 --save
+npm install nodegit@0.18 --save
 npm install tagged-versions --save
 ```
 
